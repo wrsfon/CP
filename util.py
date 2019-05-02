@@ -333,29 +333,6 @@ def loop_main(loop_e, count):
         add_text("add rax, " + b[2])
         add_text("push rax")
 
-
-def sleep_routine(mc, _):
-    mc_t = get_type(mc)
-    if mc_t == 'ID':
-        get_var(mc)
-        add_text("mov %s, [%s]" % (reg_order[0], mc))
-    elif mc_t == 'CONSTANT':
-        add_text("mov %s, %s" % (reg_order[0], mc))
-    elif mc_t == 'ARRAY':
-        index_type = get_type(mc[2])
-        if index_type == 'ID':
-            get_array_id(mc)
-            add_text('mov %s, [rbx]' % reg_order[0])
-        elif index_type == 'CONSTANT':
-            add_text('mov %s, [%s + %s * 8]' % (reg_order[0], mc[1], mc[2]))
-        else:
-            error_token()
-    else:
-        error_token()
-    add_text('imul rdi, 1000')
-    add_text('call ' + sleep_label)
-
-
 def show_routine(arg):
     # reg_c = 1
     a = arg
