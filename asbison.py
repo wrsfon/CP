@@ -45,12 +45,12 @@ def p_member2(p):
 							| empty empty empty'''
 	p[0] = ('member',p[2],p[3])
 
-def p_loopExp(p):
-	'loopExp : LOOP IDENTIFIER ASSIGN "(" CONSTANT "," CONSTANT "," exp ")" stmt FINISH'
-	p[0] = ("loop", p[2], p[5], p[7], p[9], p[11])
 # def p_loopExp(p):
-# 	'loopExp : LOOP assignL stmt FINISH'
-# 	p[0] = ("loop", p[2], p[3])
+# 	'loopExp : LOOP IDENTIFIER ASSIGN "(" CONSTANT "," CONSTANT "," exp ")" stmt FINISH'
+# 	p[0] = ("loop", p[2], p[5], p[7], p[9], p[11])
+def p_loopExp(p):
+	'loopExp : LOOP assignL stmt FINISH'
+	p[0] = ("loop", p[2], p[3])
 
 def p_assignExp_loop(p):
 	'assignL : IDENTIFIER ASSIGN expL'

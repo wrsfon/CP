@@ -68,7 +68,7 @@ add_text(main_entry)
 add_text("push rbp")
 
 cmp_symbol = ['=', '!=', '>', '<']
-loop_symbol = ['loop']
+loop_symbol = ['lp']
 
 def multiple_stm_routine(stm1, stm2):
     statement_main(stm1)
@@ -293,9 +293,15 @@ def loop_routine(exp, stm):
     loop_c = global_if_counter
     exit_c = loop_c + 1
     expression_main(exp,loop_c)
+    # print(exp[2][1])
     # global_if_counter += 1
     statement_main(stm)
-    add_text("pop rax")
+    # add_text("pop rax")
+    i=exp[1]
+    n=exp[2][2]
+    add_text("mov rax, [%s]" % i)
+    add_text("add rax, " + n)
+    add_text("mov [%s], rax" % i)
     add_text("jmp _L%d" % loop_c)
     add_text("_L%d:" % exit_c)
     global_if_counter += 1
@@ -323,17 +329,20 @@ def loop_main(loop_e, count):
     a_type = get_type(a)
     if a_type == 'ID':
         assign_routine(a,b[0])
-        get_var(a)
+        get_var(a,True)
         add_text("mov rax, [%s]" % a)
         add_text("mov rbx, " + b[1])
         global global_if_counter
         add_text("_L%d:" % count)
         global_if_counter += 1
+        # add_text("mov rax, [%s]" % a)
+        # add_text("add rax, " + b[2])
+        # add_text("mov [%s], rax" % a)
         add_text("cmp rax, rbx")
         exit_c = count+1
         add_text("jge _L%d" % exit_c)
-        add_text("add rax, " + b[2])
-        add_text("push rax")
+        # add_text("add rax, " + b[2])
+        # add_text("push rax")
 
 def show_routine(arg):
     a = arg
