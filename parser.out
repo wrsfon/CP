@@ -17,7 +17,7 @@ Rule 11    member2 -> , CONSTANT member2
 Rule 12    member2 -> empty empty empty
 Rule 13    loopExp -> LOOP assignL stmt FINISH
 Rule 14    assignL -> IDENTIFIER ASSIGN expL
-Rule 15    expL -> ( CONSTANT , CONSTANT , CONSTANT )
+Rule 15    expL -> ( CONSTANT , CONSTANT , exp )
 Rule 16    cmpExp -> CMP cond { stmt }
 Rule 17    val -> IDENTIFIER
 Rule 18    val -> CONSTANT
@@ -68,7 +68,7 @@ Terminals, with rules where they appear
 ARRAY                : 9
 ASSIGN               : 7 8 9 14
 CMP                  : 16
-CONSTANT             : 10 11 15 15 15 18 20 23
+CONSTANT             : 10 11 15 15 18 20 23
 FINISH               : 13
 IDENTIFIER           : 7 8 9 14 17 20 21 21 24
 LOOP                 : 13
@@ -91,7 +91,7 @@ assignL              : 13
 cmpExp               : 5
 cond                 : 16
 empty                : 12 12 12
-exp                  : 7 8 26 26 27 27 28 28 29 29 30 30 31 31 32 32 33 33 34 34 35 36 37 38 39 45 46
+exp                  : 7 8 15 26 26 27 27 28 28 29 29 30 30 31 31 32 32 33 33 34 34 35 36 37 38 39 45 46
 expL                 : 14
 loopExp              : 6
 member               : 9
@@ -1319,7 +1319,7 @@ state 56
 state 57
 
     (14) assignL -> IDENTIFIER ASSIGN . expL
-    (15) expL -> . ( CONSTANT , CONSTANT , CONSTANT )
+    (15) expL -> . ( CONSTANT , CONSTANT , exp )
 
     (               shift and go to state 85
 
@@ -2086,7 +2086,7 @@ state 84
 
 state 85
 
-    (15) expL -> ( . CONSTANT , CONSTANT , CONSTANT )
+    (15) expL -> ( . CONSTANT , CONSTANT , exp )
 
     CONSTANT        shift and go to state 91
 
@@ -2156,7 +2156,7 @@ state 90
 
 state 91
 
-    (15) expL -> ( CONSTANT . , CONSTANT , CONSTANT )
+    (15) expL -> ( CONSTANT . , CONSTANT , exp )
 
     ,               shift and go to state 96
 
@@ -2193,7 +2193,7 @@ state 95
 
 state 96
 
-    (15) expL -> ( CONSTANT , . CONSTANT , CONSTANT )
+    (15) expL -> ( CONSTANT , . CONSTANT , exp )
 
     CONSTANT        shift and go to state 99
 
@@ -2222,7 +2222,7 @@ state 98
 
 state 99
 
-    (15) expL -> ( CONSTANT , CONSTANT . , CONSTANT )
+    (15) expL -> ( CONSTANT , CONSTANT . , exp )
 
     ,               shift and go to state 102
 
@@ -2243,28 +2243,72 @@ state 101
 
 state 102
 
-    (15) expL -> ( CONSTANT , CONSTANT , . CONSTANT )
+    (15) expL -> ( CONSTANT , CONSTANT , . exp )
+    (22) exp -> . val
+    (30) exp -> . exp + exp
+    (31) exp -> . exp - exp
+    (32) exp -> . exp / exp
+    (33) exp -> . exp * exp
+    (34) exp -> . exp % exp
+    (35) exp -> . exp + val
+    (36) exp -> . exp - val
+    (37) exp -> . exp / val
+    (38) exp -> . exp * val
+    (39) exp -> . exp % val
+    (40) exp -> . val + val
+    (41) exp -> . val - val
+    (42) exp -> . val / val
+    (43) exp -> . val * val
+    (44) exp -> . val % val
+    (45) exp -> . - exp
+    (46) exp -> . ( exp )
+    (17) val -> . IDENTIFIER
+    (18) val -> . CONSTANT
+    (19) val -> . array_val
+    (20) array_val -> . IDENTIFIER [ CONSTANT ]
+    (21) array_val -> . IDENTIFIER [ IDENTIFIER ]
 
-    CONSTANT        shift and go to state 103
+    -               shift and go to state 28
+    (               shift and go to state 29
+    IDENTIFIER      shift and go to state 30
+    CONSTANT        shift and go to state 31
 
+    exp                            shift and go to state 103
+    val                            shift and go to state 27
+    array_val                      shift and go to state 32
 
 state 103
 
-    (15) expL -> ( CONSTANT , CONSTANT , CONSTANT . )
+    (15) expL -> ( CONSTANT , CONSTANT , exp . )
+    (30) exp -> exp . + exp
+    (31) exp -> exp . - exp
+    (32) exp -> exp . / exp
+    (33) exp -> exp . * exp
+    (34) exp -> exp . % exp
+    (35) exp -> exp . + val
+    (36) exp -> exp . - val
+    (37) exp -> exp . / val
+    (38) exp -> exp . * val
+    (39) exp -> exp . % val
 
     )               shift and go to state 104
+    +               shift and go to state 43
+    -               shift and go to state 44
+    /               shift and go to state 45
+    *               shift and go to state 46
+    %               shift and go to state 47
 
 
 state 104
 
-    (15) expL -> ( CONSTANT , CONSTANT , CONSTANT ) .
+    (15) expL -> ( CONSTANT , CONSTANT , exp ) .
 
-    IDENTIFIER      reduce using rule 15 (expL -> ( CONSTANT , CONSTANT , CONSTANT ) .)
-    t_CONSTANT      reduce using rule 15 (expL -> ( CONSTANT , CONSTANT , CONSTANT ) .)
-    ARRAY           reduce using rule 15 (expL -> ( CONSTANT , CONSTANT , CONSTANT ) .)
-    SHOW            reduce using rule 15 (expL -> ( CONSTANT , CONSTANT , CONSTANT ) .)
-    CMP             reduce using rule 15 (expL -> ( CONSTANT , CONSTANT , CONSTANT ) .)
-    LOOP            reduce using rule 15 (expL -> ( CONSTANT , CONSTANT , CONSTANT ) .)
+    IDENTIFIER      reduce using rule 15 (expL -> ( CONSTANT , CONSTANT , exp ) .)
+    t_CONSTANT      reduce using rule 15 (expL -> ( CONSTANT , CONSTANT , exp ) .)
+    ARRAY           reduce using rule 15 (expL -> ( CONSTANT , CONSTANT , exp ) .)
+    SHOW            reduce using rule 15 (expL -> ( CONSTANT , CONSTANT , exp ) .)
+    CMP             reduce using rule 15 (expL -> ( CONSTANT , CONSTANT , exp ) .)
+    LOOP            reduce using rule 15 (expL -> ( CONSTANT , CONSTANT , exp ) .)
 
 WARNING: 
 WARNING: Conflicts:

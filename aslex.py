@@ -46,7 +46,7 @@ def t_error(t):
 
 
 def t_CONSTANT(t):
-    r'0[xX][0-9a-fA-F]+|[0-9]+'
+    r'0[xX][0-9a-fA-F]+|[0-9]+|-[0-9]+'
     if t.value[:2] == '0x':
         t.value = str(int(t.value.replace('0h', '0x'), 16))
     t.type = 'CONSTANT'

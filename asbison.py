@@ -57,7 +57,7 @@ def p_assignExp_loop(p):
 	p[0] = ('lp',p[1],p[3])
 
 def p_expression_loop(p):
-    'expL : "(" CONSTANT "," CONSTANT "," CONSTANT ")"'
+    'expL : "(" CONSTANT "," CONSTANT "," exp ")"'
     p[0] = (p[2], p[4], p[6])
 
 def p_cmpExp(p):
