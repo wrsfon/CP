@@ -99,6 +99,8 @@ def get_type(symbol):
     if type(symbol) is tuple:
         if symbol[0] == 'array':
             return 'ARRAY'
+        elif symbol[0] == 'minus':
+            return 'SIGNED'
         return 'expression'
     # if symbol == 'array':
     #     return 'ARRAY'
@@ -112,13 +114,13 @@ def get_type(symbol):
 
 
 def get_var(symbol,create=False):
+    global asmdata
     if symbol not in global_var:
         if create:
             global_var.append(symbol)
-            add_data(symbol,0)
-        # asmdata += "%s dq 0\n" % symbol
-        else:
-            print_error("Use of undeclare variable %s" % symbol)
+            asmdata += "%s dq 0\n" % symbol
+        # else:
+        #     print_error("Use of undeclare variable %s" % symbol)
     return symbol
 
 
@@ -163,15 +165,20 @@ def declare_string(text):
         asm_symbol = str_prefix + str(global_str_counter)
         global_str[text] = asm_symbol
         _text = ''
-        if '\\n' in text:
-            texts = text.replace('"', '').split('\\n')
-            for t in texts:
-                if t:
-                    _text += '"' + t + '", 10,'
-            _text += ' 0'
+        if get_type(text) == 'ID':
+            _text += "\"%ld\", 0"
+            add_data(asm_symbol, _text)
+            add_text("mov rcx, %s" % asm_symbol)
         else:
-            _text = text + ', 0'
-        add_data(asm_symbol, _text)
+            if '\\n' in text:
+                texts = text.replace('"', '').split('\\n')
+                for t in texts:
+                    if t:
+                        _text += '"' + t + '", 10,'
+                _text += ' 0'
+            else:
+                _text = text + ', 0'
+            add_data(asm_symbol, _text)
         global_str_counter += 1
 
 
@@ -334,48 +341,20 @@ def loop_main(loop_e, count):
         add_text("push rax")
 
 def show_routine(arg):
-    # reg_c = 1
     a = arg
     a_type = get_type(a)
     if a_type == 'CONSTANT':
         add_text("mov %s, %s" % (reg_order[1], a))
+        add_text("mov rcx, _fmin")
     elif a_type == 'ID':
-        get_var(a)
         add_text("mov %s, [%s]" % (reg_order[1], a))
+        declare_string(a)
     elif a_type == 'STRING':
-        get_var(a)
-        add_text("mov %s, %s" % (reg_order[0], get_str(a[1:-1])))
-    add_text("mov eax, 0")
+        add_text("mov %s, %s" % (reg_order[1], a))
+        add_text("mov rcx, %s" % get_str(a))
     add_text("call " + printf_label)
     add_text("xor %s, %s" % (reg_order[0], reg_order[0]))
     add_text("call " + fflush_label)
-    # reg_c = 1
-    # while arg[1] != None:
-    #     if arg[0] == 'argument':
-    #         a = arg[1]
-    #         a_type = get_type(a)
-    #         if a_type == 'CONSTANT':
-    #             add_text("mov %s, %s" % (reg_order[reg_c], a))
-    #         elif a_type == 'ID':
-    #             get_var(a)
-    #             add_text("mov %s, [%s]" % (reg_order[reg_c], a))
-    #         elif a_type == 'ARRAY':
-    #             index_type = get_type(a[2])
-    #             if index_type == 'ID':
-    #                 get_array_id(a)
-    #                 add_text('mov %s, [rbx]' % reg_order[reg_c])
-    #             elif index_type == 'CONSTANT':
-    #                 add_text('mov %s, [%s + %s * 8]' %
-    #                          (reg_order[reg_c], a[1], a[2]))
-    #         else:
-    #             expression_main(arg[1])
-    #             add_text("mov %s, rax" % reg_order[reg_c])
-    #     reg_c += 1
-    #     arg = arg[2]
-    # add_text("mov %s, %s" % (reg_order[0], get_str(fmt)))
-    # add_text("call " + printf_label)
-    # add_text("xor %s, %s" % (reg_order[0], reg_order[0]))
-    # add_text("call " + fflush_label)
 
 def plus_routine(a, b, count=0):
     a_type = get_type(a)
