@@ -6,9 +6,7 @@ extern usleep
 global main
 section .data
 _fmin db "%ld", 0
-i dq 1,2,3,4,5,
-j dq 0
-x dq 0
+i dq 0
 _LC0 db "%ld", 0
 section .text
 _input:
@@ -24,16 +22,29 @@ leave
 ret
 main:
 push rbp
-mov rax, [i + 3 * 8]
-mov [j], rax
-mov rbx, i
-mov rcx, [j]
-imul rcx, 8
-add rbx, rcx
-mov rax, [rbx]
-imul rax, -1
-mov [x], rax
-mov rdx, [x]
+xor rdx, rdx
+mov rax, 6
+xor rdx, rdx
+mov rcx, 3
+idiv rcx
+push rax
+xor rdx, rdx
+mov rax, 14
+add rax, 7
+push rax
+xor rdx, rdx
+mov rax, 3
+add rax, 3
+pop rcx
+mov rbx, rax
+mov rax, rcx
+mov rcx, rbx
+idiv rcx
+mov rax, rdx
+pop rbx
+imul rax, rbx
+mov [i], rax
+mov rdx, [i]
 mov rcx, _LC0
 call printf
 xor rcx, rcx

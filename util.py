@@ -534,8 +534,8 @@ def divide_routine(a, b, count=0):
             add_text('mov rcx, [%s]' % a)
             add_text('idiv rcx')
     elif a_type == 'expression':
-        expression_main(a)        
-        add_text('mov rbx, rax')
+        expression_main(a) 
+        add_text('push rax')    
     elif a_type == 'ARRAY':
         index_type = get_type(a[2])
         if index_type == 'ID':
@@ -565,7 +565,11 @@ def divide_routine(a, b, count=0):
         add_text('idiv rcx')
     elif b_type == 'expression':
         expression_main(b)
+        add_text('pop rcx')
         add_text('mov rbx, rax')
+        add_text('mov rax, rcx')
+        add_text('mov rcx, rbx')
+        add_text('idiv rcx')
     elif b_type == 'ARRAY':
         index_type = get_type(b[2])
         if index_type == 'ID':
@@ -599,7 +603,7 @@ def mod_routine(a, b, count=0):
             add_text('mov rax, rdx')
     elif a_type == 'expression':
         expression_main(a)
-        add_text('mov rbx, rax')
+        add_text('push rax')
     elif a_type == 'ARRAY':
         index_type = get_type(a[2])
         if index_type == 'ID':
@@ -634,7 +638,12 @@ def mod_routine(a, b, count=0):
         add_text('mov rax, rdx')
     elif b_type == 'expression':
         expression_main(b)
+        add_text('pop rcx')
         add_text('mov rbx, rax')
+        add_text('mov rax, rcx')
+        add_text('mov rcx, rbx')
+        add_text('idiv rcx')
+        add_text('mov rax, rdx')
     elif b_type == 'ARRAY':
         index_type = get_type(b[2])
         if index_type == 'ID':
