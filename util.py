@@ -68,7 +68,7 @@ add_text(main_entry)
 add_text("push rbp")
 
 cmp_symbol = ['=', '!=', '>', '<']
-loop_symbol = ['lp']
+loop_symbol = ['loop']
 
 def multiple_stm_routine(stm1, stm2):
     statement_main(stm1)
@@ -97,7 +97,7 @@ def statement_main(stm):
 
 def get_type(symbol):
     if type(symbol) is tuple:
-        if symbol[0] == 'array':
+        if symbol[0] == 'array_val':
             return 'ARRAY'
         elif symbol[0] == 'minus':
             return 'SIGNED'
@@ -188,14 +188,15 @@ def declare_arr(var_name, args):
         print_error("Duplicate variable")
     else:
         global_var.append(var_name)
-        if args[0] == 'argument':
-            asmdata += "%s dq " % var_name
-            while args[1] != None:
-                asmdata += "%s ," % args[1]
-                args = args[2]
-        else:
-            # var array with size
-            asmdata += "%s times %s dq 0" % (var_name, args)
+        const_var.append(var_name)
+        # if args[0] == 'argument':
+        asmdata += "%s dq " % var_name
+        while args[1] != None:
+            asmdata += "%s," % args[1]
+            args = args[2]
+        # else:
+        #     # var array with size
+        #     asmdata += "%s times %s dq 0" % (var_name, args)
         asmdata += '\n'
 
 def const_assign_routine(dest,source):
@@ -205,27 +206,24 @@ def const_assign_routine(dest,source):
     if s_type == 'CONSTANT':
         add_text('mov rax, ' + source)
     elif s_type == 'ID':
-        get_var(source)
+        if source not in global_var:
+            print_error("Use of undeclare variable %s" % source)
         add_text('mov rax, [%s]' % source)
     elif s_type == 'expression':
         expression_main(source)
     elif s_type == 'ARRAY':
-        index_type = get_type(source[2]) #check structure
-        get_var(source[1]) #check structure
+        if source[1] not in global_var:
+            print_error("Use of undeclare variable %s" % source[1])
+        index_type = get_type(source[2])
         if index_type == 'ID':
+            if source[2] not in global_var:
+                print_error("Use of undeclare variable %s" % source[1])
             get_array_id(source)
             add_text('mov rax, [rbx]')
         elif index_type == 'CONSTANT':
             add_text('mov rax, [%s + %s * 8]' % (source[1], source[2]))
 
-    if d_type == 'ARRAY':
-        index_type = get_type(dest[2])
-        if index_type == 'ID':
-            get_array_id(dest)
-            add_text('mov [rbx], rax')
-        elif index_type == 'CONSTANT':
-            add_text('mov [%s + %s * 8], rax' % (dest[1], dest[2]))
-    else:
+    if d_type == 'ID':
         get_var(dest,True)
         add_text('mov [%s], rax' % dest)
 
@@ -242,27 +240,36 @@ def assign_routine(dest, source):
     if s_type == 'CONSTANT':
         add_text('mov rax, ' + source)
     elif s_type == 'ID':
-        get_var(source)
+        if source not in global_var:
+            print_error("Use of undeclare variable %s" % source)
         add_text('mov rax, [%s]' % source)
     elif s_type == 'expression':
         expression_main(source)
     elif s_type == 'ARRAY':
-        index_type = get_type(source[2]) #check structure
-        get_var(source[1]) #check structure
+        if source[1] not in global_var:
+            print_error("Use of undeclare variable %s" % source[1])
+        index_type = get_type(source[2])
         if index_type == 'ID':
+            if source[2] not in global_var:
+                print_error("Use of undeclare variable %s" % source[1])
             get_array_id(source)
             add_text('mov rax, [rbx]')
         elif index_type == 'CONSTANT':
             add_text('mov rax, [%s + %s * 8]' % (source[1], source[2]))
 
-    if d_type == 'ARRAY':
-        index_type = get_type(dest[2])
-        if index_type == 'ID':
-            get_array_id(dest)
-            add_text('mov [rbx], rax')
-        elif index_type == 'CONSTANT':
-            add_text('mov [%s + %s * 8], rax' % (dest[1], dest[2]))
-    else:
+    # if d_type == 'ARRAY':
+    #     if source[1] not in global_var:
+    #             print_error("Use of undeclare variable %s" % source[1])
+    #     index_type = get_type(dest[2])
+    #     if index_type == 'ID':
+    #         if source[2] not in global_var:
+    #             print_error("Use of undeclare variable %s" % source[1])
+    #         get_array_id(dest)
+    #         add_text('mov [rbx], rax')
+    #     elif index_type == 'CONSTANT':
+    #         add_text('mov [%s + %s * 8], rax' % (dest[1], dest[2]))
+    # else:
+    if d_type == 'ID':
         get_var(dest,True)
         add_text('mov [%s], rax' % dest)
 
@@ -280,14 +287,6 @@ def cmp_routine(exp, stm):
     #     add_text("jmp _L%d" % (global_if_counter + offset))
     add_text("_L%d:" % exit_c)
 
-
-# def else_routine(stm):
-#     global global_if_counter
-#     statement_main(stm[1])
-#     global_if_counter += 1
-#     add_text("_L%d:" % global_if_counter)
-
-
 def loop_routine(exp, stm):
     global global_if_counter
     global_if_counter += 1
@@ -304,7 +303,7 @@ def loop_routine(exp, stm):
 def expression_main(exp, count=0):
     t = exp[0]
     if t in cmp_symbol:
-        cmp_main(exp) #error
+        cmp_main(exp)
     elif t in loop_symbol:
         loop_main(exp,count)
     else:
@@ -315,12 +314,8 @@ def expression_main(exp, count=0):
             '/': divide_routine,
             '%': mod_routine
         }
-
         func = switcher[t]
         func(exp[1], exp[2], count)
-
-# def input_routine():
-#     add_text("call _input")
 
 def loop_main(loop_e, count):
     a = loop_e[1]
@@ -403,7 +398,6 @@ def plus_routine(a, b, count=0):
             add_text('add rax, [rbx]')
         elif index_type == 'CONSTANT':
             add_text('add rax, [%s + %s * 8]' % (b[1], b[2]))
-
     else:
         error_token()
 

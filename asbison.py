@@ -43,7 +43,7 @@ def p_member(p):
 def p_member2(p): 
 	'''member2 : "," CONSTANT member2
 							| empty empty empty'''
-	p[0] = (p[2],p[3])
+	p[0] = ('member',p[2],p[3])
 
 def p_loopExp(p):
 	'loopExp : LOOP IDENTIFIER ASSIGN "(" CONSTANT "," CONSTANT "," exp ")" stmt FINISH'
