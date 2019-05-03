@@ -102,8 +102,6 @@ def get_type(symbol):
         elif symbol[0] == 'minus':
             return 'SIGNED'
         return 'expression'
-    # if symbol == 'array':
-    #     return 'ARRAY'
     if symbol[0]=='\"':
         return 'STRING'
     try:
@@ -119,13 +117,10 @@ def get_var(symbol,create=False):
         if create:
             global_var.append(symbol)
             asmdata += "%s dq 0\n" % symbol
-        # else:
-        #     print_error("Use of undeclare variable %s" % symbol)
     return symbol
 
 
 def get_str(text):
-    # add_text("%s" %text)
     if text not in global_str:
         declare_string(text)
     return global_str[text]
@@ -168,14 +163,10 @@ def declare_arr(var_name, args):
     else:
         global_var.append(var_name)
         const_var.append(var_name)
-        # if args[0] == 'argument':
         asmdata += "%s dq " % var_name
         while args[1] != None:
             asmdata += "%s," % args[1]
             args = args[2]
-        # else:
-        #     # var array with size
-        #     asmdata += "%s times %s dq 0" % (var_name, args)
         asmdata += '\n'
 
 def const_assign_routine(dest,source):
@@ -269,11 +260,6 @@ def cmp_routine(exp, stm):
     exit_c = global_if_counter
     expression_main(exp)
     statement_main(stm)
-    # if else_stm:
-    #     offset = 1
-    #     s = str(else_stm)
-    #     offset += s.count("'else'")
-    #     add_text("jmp _L%d" % (global_if_counter + offset))
     add_text("_L%d:" % exit_c)
 
 def loop_routine(exp, stm):
@@ -282,10 +268,7 @@ def loop_routine(exp, stm):
     loop_c = global_if_counter
     exit_c = loop_c + 1
     expression_main(exp,loop_c)
-    # print(exp[2][1])
-    # global_if_counter += 1
     statement_main(stm)
-    # add_text("pop rax")
     i=exp[1]
     n=exp[2][2]
     add_text("mov rax, [%s]" % i)
@@ -324,15 +307,9 @@ def loop_main(loop_e, count):
         global_if_counter += 1
         add_text("mov rax, [%s]" % a)
         add_text("mov rbx, " + b[1])
-        
-        # add_text("mov rax, [%s]" % a)
-        # add_text("add rax, " + b[2])
-        # add_text("mov [%s], rax" % a)
         add_text("cmp rax, rbx")
         exit_c = count+1
         add_text("jge _L%d" % exit_c)
-        # add_text("add rax, " + b[2])
-        # add_text("push rax")
 
 def show_routine(arg):
     a = arg
@@ -366,7 +343,6 @@ def plus_routine(a, b, count=0):
             add_text("add rax, [%s]" % a)
     elif a_type == 'expression':
         expression_main(a)
-        # add_text('mov rbx, rax')
         add_text('push rax')
     elif a_type == 'ARRAY':
         index_type = get_type(a[2])
@@ -421,7 +397,6 @@ def minus_routine(a, b, count=0):
             add_text("sub rax, [%s]" % a)
     elif a_type == 'expression':
         expression_main(a)
-        # add_text('mov rbx, rax')
         add_text('push rax')
     elif a_type == 'ARRAY':
         index_type = get_type(a[2])
@@ -477,7 +452,6 @@ def multiply_routine(a, b, count=0):
             add_text("imul rax, [%s]" % a)
     elif a_type == 'expression':
         expression_main(a)
-        # add_text('mov rbx, rax')
         add_text('push rax')
     elif a_type == 'ARRAY':
         index_type = get_type(a[2])
