@@ -6,6 +6,7 @@ extern usleep
 global main
 section .data
 _fmin db "%ld", 0
+b dq 1,2,3,4,5,
 i dq 0
 _LC0 db "%ld", 0
 section .text
@@ -33,8 +34,8 @@ mov rax, 14
 add rax, 7
 push rax
 xor rdx, rdx
-mov rax, 3
-add rax, 3
+mov rax, [b + 2 * 8]
+add rax, 1
 pop rcx
 mov rbx, rax
 mov rax, rcx

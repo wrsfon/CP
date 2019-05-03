@@ -33,7 +33,7 @@ args = parser.parse_args()
 
 
 
-lines = open(args.input, 'r').read()
+lines = open(args.input, 'r', encoding="utf8").read()
 
 util.lexer = aslex.lexer
 

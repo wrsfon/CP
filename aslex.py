@@ -34,7 +34,7 @@ def t_IDENTIFIER(t):
 
 
 def t_error(t):
-    print('Illegal character')
+    # print('Illegal character')
     t.lexer.skip(1)
 
 
